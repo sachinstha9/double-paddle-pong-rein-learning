@@ -1,3 +1,6 @@
+import os
+# os.environ["SDL_VIDEODRIVER"] = "dummy"
+
 import pygame
 import random
 import math
@@ -11,15 +14,16 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
-FPS = 1024
+FPS = 5000
+
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+CLOCK = pygame.time.Clock()
 
 class Game:
     def __init__(self):
         self.width = WIDTH
         self.height = HEIGHT
 
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.clock = pygame.time.Clock()
 
         self.paddle_width = 20
         self.paddle_height = 200
@@ -30,6 +34,7 @@ class Game:
         self.paddle_position_r = []
 
         self.ball_size = 25
+
         self.ball_position = []
         self.ball_color = RED
         self.ball_velocity = []
@@ -87,8 +92,18 @@ class Game:
 
         reward = 0
 
-        if self.paddle_position_l[0] + self.paddle_width > self.ball_position[0] - (self.ball_size):
-            if self.paddle_position_l[1] <= self.ball_position[1] + (self.ball_size) and self.paddle_position_l[1] + self.paddle_height >= self.ball_position[1] - (self.ball_size):
+        paddle_left = self.paddle_position_l[0]
+        paddle_right = self.paddle_position_l[0] + self.paddle_width
+        paddle_top = self.paddle_position_l[1]
+        paddle_bottom = self.paddle_position_l[1] + self.paddle_height
+
+        ball_left = self.ball_position[0] - self.ball_size
+        ball_right = self.ball_position[0] + self.ball_size
+        ball_top = self.ball_position[1] - self.ball_size
+        ball_bottom = self.ball_position[1] + self.ball_size
+
+        if ball_right >= paddle_left and ball_left <= paddle_right:
+            if ball_bottom >= paddle_top and ball_top <= paddle_bottom:
                 reward = 10
         
         if self.ball_position[0] + (self.ball_size) < 0:
@@ -101,10 +116,10 @@ class Game:
         return self.get_state(), reward, done
             
     def draw(self):
-        self.screen.fill((0, 0, 0))
+        SCREEN.fill((0, 0, 0))
 
         # left paddle
-        pygame.draw.rect(self.screen, self.paddle_color, (
+        pygame.draw.rect(SCREEN, self.paddle_color, (
             self.paddle_position_l[0],
             self.paddle_position_l[1],
             self.paddle_width,
@@ -112,7 +127,7 @@ class Game:
         ))
 
         # right paddle
-        pygame.draw.rect(self.screen, self.paddle_color, (
+        pygame.draw.rect(SCREEN, self.paddle_color, (
             self.paddle_position_r[0],
             self.paddle_position_r[1],
             self.paddle_width,
@@ -120,12 +135,12 @@ class Game:
         ))
 
         # ball
-        pygame.draw.circle(self.screen, self.ball_color, (
+        pygame.draw.circle(SCREEN, self.ball_color, (
             self.ball_position[0],
             self.ball_position[1]
         ), self.ball_size) 
 
-        self.clock.tick(FPS)
+        CLOCK.tick(FPS)
 
         pygame.display.update()
 
@@ -143,9 +158,20 @@ class Game:
             self.ball_position[1] = self.ball_size
             self.ball_velocity[1] *= -1
 
-        if self.paddle_position_l[0] + self.paddle_width > self.ball_position[0] - (self.ball_size) and self.paddle_position_l[0] < self.ball_position[0] - (self.ball_size):
-            if self.paddle_position_l[1] <= self.ball_position[1] + (self.ball_size) and self.paddle_position_l[1] + self.paddle_height >= self.ball_position[1] - (self.ball_size):
+        paddle_left = self.paddle_position_l[0]
+        paddle_right = self.paddle_position_l[0] + self.paddle_width
+        paddle_top = self.paddle_position_l[1]
+        paddle_bottom = self.paddle_position_l[1] + self.paddle_height
+
+        ball_left = self.ball_position[0] - self.ball_size
+        ball_right = self.ball_position[0] + self.ball_size
+        ball_top = self.ball_position[1] - self.ball_size
+        ball_bottom = self.ball_position[1] + self.ball_size
+
+        if ball_right >= paddle_left and ball_left <= paddle_right:
+            if ball_bottom >= paddle_top and ball_top <= paddle_bottom:
                 self.ball_velocity[0] *= -1
+                self.ball_position[0] = paddle_right + self.ball_size  # avoid sticking
 
 
         self.draw()
