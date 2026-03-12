@@ -11,12 +11,15 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
+FPS = 60
+
 class Game:
     def __init__(self):
         self.width = WIDTH
         self.height = HEIGHT
 
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.clock = pygame.time.Clock()
 
         self.paddle_width = 20
         self.paddle_height = 200
@@ -53,7 +56,7 @@ class Game:
         return self.get_state()
 
     def get_state(self):
-        dis_b_x_l = max(((self.ball_position[0] - (self.ball_size / 2)) - (self.paddle_position_l[0] + self.paddle_width)) / WIDTH - (self.paddle_position_l[0] + self.paddle_width), 0) 
+        dis_b_x_l = max(((self.ball_position[0] - (self.ball_size)) - (self.paddle_position_l[0] + self.paddle_width)) / WIDTH - (self.paddle_position_l[0] + self.paddle_width), 0) 
         dis_b_y_l = (self.ball_position[1] - (self.paddle_position_l[1] + (self.paddle_height / 2)) + HEIGHT) / HEIGHT * 2
 
         dis_b_w_y_b = (HEIGHT - self.ball_position[1]) / HEIGHT 
@@ -84,17 +87,16 @@ class Game:
 
         reward = 0
 
-        if self.paddle_position_l[0] + self.paddle_width > self.ball_position[0] - (self.ball_size / 2):
-            if self.paddle_position_l[1] <= self.ball_position[1] + (self.ball_size / 2) and self.paddle_position_l[1] + self.paddle_height >= self.ball_position[1] - (self.ball_size / 2):
+        if self.paddle_position_l[0] + self.paddle_width > self.ball_position[0] - (self.ball_size):
+            if self.paddle_position_l[1] <= self.ball_position[1] + (self.ball_size) and self.paddle_position_l[1] + self.paddle_height >= self.ball_position[1] - (self.ball_size):
                 reward = 10
         
-        if self.ball_position[0] + (self.ball_size / 2) < 0:
+        if self.ball_position[0] + (self.ball_size) < 0:
             reward = -10
             done = True
 
         return self.get_state(), reward, done
-
-
+            
     def draw(self):
         self.screen.fill((0, 0, 0))
 
@@ -120,9 +122,34 @@ class Game:
             self.ball_position[1]
         ), self.ball_size) 
 
+        self.clock.tick(FPS)
+
         pygame.display.update()
+
+    def update(self):
+        self.ball_position[0] += self.ball_velocity[0]
+        self.ball_position[1] += self.ball_velocity[1]
+
+        if self.ball_position[0] + (self.ball_size) > WIDTH:
+            self.ball_position[0] = WIDTH - (self.ball_size)
+            self.ball_velocity[0] *= -1
+        elif self.ball_position[1] + (self.ball_size) > HEIGHT:
+            self.ball_position[1] = HEIGHT - (self.ball_size)
+            self.ball_velocity[1] *= -1
+        elif self.ball_position[1] - (self.ball_size) <= 0:
+            self.ball_position[1] = self.ball_size
+            self.ball_velocity[1] *= -1
+
+        if self.paddle_position_l[0] + self.paddle_width > self.ball_position[0] - (self.ball_size):
+            if self.paddle_position_l[1] <= self.ball_position[1] + (self.ball_size) and self.paddle_position_l[1] + self.paddle_height >= self.ball_position[1] - (self.ball_size):
+                self.ball_velocity[0] *= -1
+
+        self.draw()
 
 g = Game()
 
 while True:
-    g.draw()
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            exit()
+    g.update()
