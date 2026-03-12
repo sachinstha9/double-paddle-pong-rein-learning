@@ -1,4 +1,6 @@
 import pygame
+import random
+import math
 
 pygame.init()
 
@@ -7,6 +9,7 @@ HEIGHT = 1000
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+BLACK = (0, 0, 0)
 
 class Game:
     def __init__(self):
@@ -18,7 +21,19 @@ class Game:
         self.paddle_width = 20
         self.paddle_height = 200
         self.paddle_color = WHITE
+        self.paddle_y_velocity = 10
 
+        self.paddle_position_l = []
+        self.paddle_position_r = []
+
+        self.ball_size = 25
+        self.ball_position = []
+        self.ball_color = RED
+        self.ball_velocity = []
+
+        self.reset()
+
+    def reset(self):
         self.paddle_position_l = [
             50,
             (HEIGHT / 2) - (self.paddle_height / 2)
@@ -28,12 +43,36 @@ class Game:
             (HEIGHT / 2) - (self.paddle_height / 2)
         ]
 
-        self.ball_size = 25
         self.ball_position = [
             WIDTH / 2,
             HEIGHT / 2
         ]
-        self.ball_color = RED
+
+        self.ball_velocity = [10, 8]
+
+    def get_state(self):
+        dis_b_x_l = max(((self.ball_position[0] - (self.ball_size / 2)) - (self.paddle_position_l[0] + self.paddle_width)) / WIDTH - (self.paddle_position_l[0] + self.paddle_width), 0) 
+        dis_b_y_l = (self.ball_position[1] - (self.paddle_position_l[1] + (self.paddle_height / 2)) + HEIGHT) / HEIGHT * 2
+
+        dis_b_w_y_b = (HEIGHT - self.ball_position[1]) / HEIGHT 
+        
+        h = math.sqrt(self.ball_velocity[0] ** 2 + self.ball_velocity[1] ** 2)
+        
+        ang_b_y = (math.asin(self.ball_velocity[0] / h) + (math.pi / 2)) / math.pi
+        ang_b_x = (math.asin(self.ball_velocity[1] / h) + (math.pi / 2)) / math.pi
+
+        return [
+            dis_b_x_l,
+            dis_b_y_l,
+            dis_b_w_y_b,
+            ang_b_y,
+            ang_b_x,
+            (self.ball_velocity[0] + 10) / 20,
+            (self.ball_velocity[1] + 8) / 16,
+            (self.paddle_y_velocity + 10) / 20
+        ]
+
+
 
     def draw(self):
         self.screen.fill((0, 0, 0))
