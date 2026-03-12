@@ -5,13 +5,13 @@ class Qnet(nn.Module):
         super().__init__()
 
         self.net = nn.Sequential(
-            nn.Linear(5, 128),
+            nn.Linear(8, 128),
             nn.ReLU(),
             nn.Linear(128, 256),
             nn.ReLU(),
             nn.Linear(256, 128),
             nn.ReLU(),
-            nn.Linear(128, 2)
+            nn.Linear(128, 3)
         )
 
     def forward(self, x):

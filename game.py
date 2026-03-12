@@ -11,7 +11,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
-FPS = 60
+FPS = 1024
 
 class Game:
     def __init__(self):
@@ -95,6 +95,9 @@ class Game:
             reward = -10
             done = True
 
+        if self.paddle_position_l[1] < 0 or self.paddle_position_l[1] + self.paddle_height > HEIGHT:
+            reward = -10
+
         return self.get_state(), reward, done
             
     def draw(self):
@@ -140,16 +143,10 @@ class Game:
             self.ball_position[1] = self.ball_size
             self.ball_velocity[1] *= -1
 
-        if self.paddle_position_l[0] + self.paddle_width > self.ball_position[0] - (self.ball_size):
+        if self.paddle_position_l[0] + self.paddle_width > self.ball_position[0] - (self.ball_size) and self.paddle_position_l[0] < self.ball_position[0] - (self.ball_size):
             if self.paddle_position_l[1] <= self.ball_position[1] + (self.ball_size) and self.paddle_position_l[1] + self.paddle_height >= self.ball_position[1] - (self.ball_size):
                 self.ball_velocity[0] *= -1
 
+
         self.draw()
 
-g = Game()
-
-while True:
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT:
-            exit()
-    g.update()
