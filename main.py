@@ -22,21 +22,15 @@ for ep in range(EPISODES):
 
         next_state, reward, done = game.step(action)
 
+        agent.remember(state, action, reward, next_state, done)
+
         agent.train(state, next_state, done, reward, action, epsilon_update)
+
+        agent.replay()
 
         state = next_state
 
         game.update()
-
-        if reward == 10:
-            print("##############################################" \
-            "##############################################" \
-            "##############################################" \
-            "##############################################" \
-            "##############################################")
-            
-        else:
-            print("----------------------------------------------")
 
         epsilon_update = False
 
