@@ -50,6 +50,8 @@ class Game:
 
         self.ball_velocity = [10, 8]
 
+        return self.get_state()
+
     def get_state(self):
         dis_b_x_l = max(((self.ball_position[0] - (self.ball_size / 2)) - (self.paddle_position_l[0] + self.paddle_width)) / WIDTH - (self.paddle_position_l[0] + self.paddle_width), 0) 
         dis_b_y_l = (self.ball_position[1] - (self.paddle_position_l[1] + (self.paddle_height / 2)) + HEIGHT) / HEIGHT * 2
@@ -71,7 +73,26 @@ class Game:
             (self.ball_velocity[1] + 8) / 16,
             (self.paddle_y_velocity + 10) / 20
         ]
+    
+    def step(self, action):
+        if action == 0:
+            self.paddle_position_l[1] -= self.paddle_y_velocity
+        elif action == 2:
+            self.paddle_position_l[1] += self.paddle_y_velocity
 
+        done = False
+
+        reward = 0
+
+        if self.paddle_position_l[0] + self.paddle_width > self.ball_position[0] - (self.ball_size / 2):
+            if self.paddle_position_l[1] <= self.ball_position[1] + (self.ball_size / 2) and self.paddle_position_l[1] + self.paddle_height >= self.ball_position[1] - (self.ball_size / 2):
+                reward = 10
+        
+        if self.ball_position[0] + (self.ball_size / 2) < 0:
+            reward = -10
+            done = True
+
+        return self.get_state(), reward, done
 
 
     def draw(self):
